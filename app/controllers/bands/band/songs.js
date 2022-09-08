@@ -1,7 +1,6 @@
 import Controller from '@ember/controller';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
-import { Song } from '../../../models/song';
 import { inject as service } from '@ember/service';
 
 export default class BandsBandSongsController extends Controller {
@@ -16,12 +15,23 @@ export default class BandsBandSongsController extends Controller {
   }
 
   @action
-  saveSong() {
-    const song = new Song({ title: this.title, band: this.model });
-    this.model.songs = [...this.model.songs, song];
-    this.catalog.add('song', song);
+  async saveSong() {
+    this.catalog.create('song', { title: this.title }, {band: {
+      data: {
+        id: this.model.id,
+        type: 'bands'
+      }
+    }});
+
+    this.model.songs = this.catalog.songs;
     this.title = '';
     this.showAddSong = true;
+  }
+
+  @action
+  async updateRating(song, rating) {
+    song.rating = rating;
+    this.catalog.update('song', song, {rating});
   }
 
   @action
